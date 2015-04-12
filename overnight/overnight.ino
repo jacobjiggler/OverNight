@@ -28,6 +28,8 @@ LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 
 void setup() {
   //Initialization
+  alarmHour = 23;
+  alarmMin = 17;
   Wire.begin();
   Serial.begin(9600);
 
@@ -48,6 +50,7 @@ void setup() {
   pinMode(alarmPin, INPUT);
   pinMode(backlightPin, OUTPUT);
   pinMode(buzzPin, OUTPUT);
+  noTone(buzzPin);
   digitalWrite(backlightPin, HIGH);
 }
 
@@ -126,12 +129,18 @@ void loop() {
 
   //alarm check
   if (alarmHour == now.hour()){
-    if (alarmMin = now.minute()){
-      Serial.println("test");
+    if (alarmMin == now.minute()){
       if (!buzzer){
-        tone(buzzPin, 1000);
+        Serial.println("test");
+        tone(buzzPin, 100, 5000);
         buzzer = true;
       }
+      else {
+        //noTone(buzzPin);
+        //digitalWrite(buzzPin, LOW);
+        digitalWrite(buzzPin, HIGH);
+        Serial.println("test2");
+    }
     }
     //min doesnt match
     else {
