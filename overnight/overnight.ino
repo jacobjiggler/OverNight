@@ -20,6 +20,7 @@ int alarmPinState = 0;
 
 int lastHourPinState = 1;
 int lastMinPinState = 1;
+int count = 0;
 
 LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 
@@ -30,7 +31,7 @@ void setup() {
   
   // Initialize LCD
   lcd.begin(16, 2);
-  lcd.print("Hello wor;ld");
+  lcd.print("Program Starting");
   
   //Set up RTC
   RTC.begin(); 
@@ -42,7 +43,6 @@ void setup() {
   alarmTime.Minute = 0;
   alarmTime.Seconds = 0; 
   */
-  
   
   //I/O 
   
@@ -102,15 +102,20 @@ void loop() {
     Serial.println("hour");
   }
   */
- 
-  showTime();
-  delay(1000);
+  
+  count+=1;
+  delay(100);
+  if(count == 10){
+    showTime();
+    count=0;
+  }
 }
 
 void showTime(){
   now = RTC.now();
   Serial.print("The current time is ");
   Serial.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + "\n");
-  
+  lcd.clear();
+  lcd.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + (alarm ? "  ALARM" : ""));
 }
 
