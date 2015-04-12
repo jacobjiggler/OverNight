@@ -6,6 +6,7 @@ DateTime now; // Holds the current date and time information
 const int hourPin = 2;
 const int minPin = 3;
 const int alarmPin = 4;
+const int alarmTogglePin = 5;
 const int buzzPin = 6;
 const int backlightPin = 53;
 
@@ -29,7 +30,7 @@ LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 void setup() {
   //Initialization
   alarmHour = 23;
-  alarmMin = 17;
+  alarmMin = 43;
   Wire.begin();
   Serial.begin(9600);
 
@@ -50,8 +51,11 @@ void setup() {
   pinMode(alarmPin, INPUT);
   pinMode(backlightPin, OUTPUT);
   pinMode(buzzPin, OUTPUT);
+  pinMode(alarmTogglePin, INPUT);
   noTone(buzzPin);
+  digitalWrite(buzzPin, HIGH);
   digitalWrite(backlightPin, HIGH);
+  
 }
 
 
@@ -59,6 +63,8 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   alarmPinState = digitalRead(alarmPin);
+  alarm = digitalRead(alarmTogglePin);
+  Serial.println(alarm);
   if(alarmPinState == LOW){
     alarmSet = true;
     //implement Change Alarm Time
@@ -132,7 +138,7 @@ void loop() {
     if (alarmMin == now.minute()){
       if (!buzzer){
         Serial.println("test");
-        tone(buzzPin, 100, 5000);
+        tone(buzzPin, 100, 2000);
         buzzer = true;
       }
       else {
