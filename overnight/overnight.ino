@@ -11,6 +11,7 @@ const int alarmPin = 4;
 const int backlightPin = 53;
 
 boolean alarm = false; // Holds the current state of the alarm
+boolean alarmSet = false;
 DateTime alarmTime;
 
 
@@ -22,7 +23,22 @@ int lastHourPinState = 1;
 int lastMinPinState = 1;
 int count = 0;
 
+int alarmHour = 0;
+int alarmMin = 0;
+
 LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
+/*
+enum alarmHour
+{
+  0,
+  1,
+  2
+};
+
+enum alarmMinutes{
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59
+};
+*/
 
 void setup() {
   //Initialization
@@ -37,12 +53,6 @@ void setup() {
   RTC.begin(); 
   RTC.adjust(DateTime(__DATE__, __TIME__));
   
-  //alarmTime Initialized
-  /*
-  alarmTime.Hour = 0;
-  alarmTime.Minute = 0;
-  alarmTime.Seconds = 0; 
-  */
   
   //I/O 
   
@@ -61,6 +71,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   alarmPinState = digitalRead(alarmPin);
   if(alarmPinState == LOW){
+    alarmSet = true;
     //implement Change Alarm Time
       //Serial.println("SETTING ALARM");
       hourPinState = digitalRead(hourPin);
@@ -86,6 +97,9 @@ void loop() {
       lastHourPinState = hourPinState;
       lastMinPinState = minPinState;
   }
+  else{
+    alarmSet = false;
+  }
 
   /*
   hourPinState = digitalRead(hourPin);
@@ -106,8 +120,15 @@ void loop() {
   count+=1;
   delay(100);
   if(count == 10){
-    showTime();
-    count=0;
+    if(alarmSet == false){
+      showTime();
+      count=0;
+    }
+  }
+  
+  if(alarmSet){
+    lcd.clear();
+    
   }
 }
 
