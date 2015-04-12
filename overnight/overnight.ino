@@ -130,29 +130,27 @@ void loop() {
   if (alarmHour == now.hour()){
     if (alarmMin = now.minute()){
       if (count2 < 50){
-        alarm = true;
+        //BUZZ
+        digitalWrite(buzzPin, HIGH);
       }
       else {
-        alarm = false;
+        digitalWrite(buzzPin, LOW);
       }
       count2+=1;
     }
     //min doesnt match
     else {
       count2 = 0;
-      alarm = false;
+      digitalWrite(buzzPin, LOW);
     }
   }
   //hour doesnt match
   else {
     count2 = 0;
-    alarm = false;
+    digitalWrite(buzzPin, LOW);
   }
   
-  if (alarm){
-    //BUZZ
-    digitalWrite(buzzPin, HIGH);
-  }
+  digitalWrite(buzzPin, HIGH);
 
   if(alarmSet){
     lcd.clear();
