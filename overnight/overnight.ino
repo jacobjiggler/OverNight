@@ -10,10 +10,8 @@ const int alarmPin = 4;
 
 const int backlightPin = 53;
 
-boolean alarm = false; // Holds the current state of the alarm
-boolean alarmSet = false;
-DateTime alarmTime;
-
+boolean alarm = false; // Holds the current state of the alarm if on or off
+boolean alarmSet = false; //Is true if alarm button is being held down
 
 int hourPinState = 0;
 int minPinState = 0;
@@ -27,47 +25,36 @@ int alarmHour = 0;
 int alarmMin = 0;
 
 LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
-/*
-enum alarmHour
-{
-  0,
-  1,
-  2
-};
 
-enum alarmMinutes{
-  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59
-};
-*/
 
 void setup() {
   //Initialization
   Wire.begin();
   Serial.begin(9600);
-  
+
   // Initialize LCD
   lcd.begin(16, 2);
   lcd.print("Program Starting");
-  
+
   //Set up RTC
-  RTC.begin(); 
+  RTC.begin();
   RTC.adjust(DateTime(__DATE__, __TIME__));
-  
-  
-  //I/O 
-  
+
+
+  //I/O
+
   //buttons
   pinMode(hourPin, INPUT);
   pinMode(minPin, INPUT);
   pinMode(alarmPin, INPUT);
   pinMode(backlightPin, OUTPUT);
-  
+
   digitalWrite(backlightPin, HIGH);
 }
 
 
 
-void loop() { 
+void loop() {
   // put your main code here, to run repeatedly:
   alarmPinState = digitalRead(alarmPin);
   if(alarmPinState == LOW){
@@ -83,7 +70,7 @@ void loop() {
           //increment hour counter
         }
       }
-      
+
       if(minPinState != lastMinPinState){
         //if the state has changed increment the counter
         if(minPinState == LOW){
@@ -91,9 +78,9 @@ void loop() {
           //increment hour counter
         }
       }
-      
-      
-      
+
+
+
       lastHourPinState = hourPinState;
       lastMinPinState = minPinState;
   }
@@ -105,7 +92,7 @@ void loop() {
   hourPinState = digitalRead(hourPin);
   minPinState = digitalRead(minPin);
   alarmPinState = digitalRead(alarmPin);
-  
+
   if(alarmPinState == LOW){
     Serial.println("alarm");
   }
@@ -116,7 +103,7 @@ void loop() {
     Serial.println("hour");
   }
   */
-  
+
   count+=1;
   delay(100);
   if(count == 10){
@@ -125,10 +112,10 @@ void loop() {
       count=0;
     }
   }
-  
+
   if(alarmSet){
     lcd.clear();
-    
+
   }
 }
 
@@ -139,4 +126,3 @@ void showTime(){
   lcd.clear();
   lcd.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + (alarm ? "  ALARM" : ""));
 }
-
