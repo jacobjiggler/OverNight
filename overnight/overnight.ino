@@ -1,6 +1,8 @@
 #include <Wire.h>
 #include "RTClib.h"
 #include <LiquidCrystal.h>
+#include "TimerOne.h"
+
 RTC_DS1307 RTC;
 DateTime now; // Holds the current date and time information
 const int hourPin = 2;
@@ -14,6 +16,8 @@ const int backlightPin = 53;
 boolean alarm = false; // Holds the current state of the alarm if on or off
 boolean alarmSet = false; //Is true if alarm button is being held down
 boolean buzzer = false; // holds if the buzzer is on or off
+boolean buzzer_oscillate = false;
+int buzzer_overflows = 0;
 boolean charge = false;
 int hourPinState = 0;
 int minPinState = 0;
@@ -32,8 +36,8 @@ LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 
 void setup() {
   //Initialization
-  alarmHour = 23;
-  alarmMin = 43;
+  alarmHour = 10;
+  alarmMin = 15;
   Wire.begin();
   Serial.begin(9600);
 
@@ -45,6 +49,9 @@ void setup() {
   RTC.begin();
   RTC.adjust(DateTime(__DATE__, __TIME__));
 
+  // Initialize timer for oscillating the buzzer
+  Timer1.initialize(500000);
+  Timer1.attachInterrupt(handleBuzzer);
 
   //I/O
 
@@ -56,19 +63,16 @@ void setup() {
   pinMode(chargePin, OUTPUT);
   pinMode(backlightPin, OUTPUT);
   pinMode(buzzPin, OUTPUT);
-  noTone(buzzPin);
   digitalWrite(buzzPin, HIGH);
+  digitalWrite(buzzPin, HIGH);
+  digitalWrite(chargePin, HIGH);
   digitalWrite(backlightPin, HIGH);
-  
 }
-
-
 
 void loop() {
   // put your main code here, to run repeatedly:
   alarmPinState = digitalRead(alarmPin);
   alarm = digitalRead(alarmTogglePin);
-  Serial.println(alarm);
   if(alarmPinState == LOW){
     alarmSet = true;
     //implement Change Alarm Time
@@ -129,15 +133,18 @@ void loop() {
   //alarm check
   if (alarmHour == now.hour()){
     if (alarmMin == now.minute()){
-      if (!buzzer){
-        //add check here for switch?
-        tone(buzzPin, 100, 2000);
-        buzzer = true;
+      if (now.second() == 0) {
+        if (alarm) {
+          Serial.println("initially enabling buzzer");
+          buzzer = true;
+        }
       }
+     }
+     /*
       else {
         digitalWrite(buzzPin, HIGH);
-    }
-    }
+      }
+      */
     //min doesnt match
     else {
       buzzer = false;
@@ -165,7 +172,9 @@ void showTime(){
 void setChargeTime(){
   //decrement everything by 70 minutes
   
-  //set charge to false here and stop charging if already started
+  charge = false;
+  digitalWrite(chargePin, HIGH);
+  
   if (alarmHour == 0){
     chargeHour = 24;
   }
@@ -185,4 +194,25 @@ void setChargeTime(){
    chargeMin = alarmMin - 10;
   }
 //if now is between charge time and current time begin charging and set charge to 1
+}
+
+void handleBuzzer() {  
+  if (buzzer) {
+    if (buzzer_overflows > 10) {
+      buzzer_overflows = 0;
+      digitalWrite(buzzPin, HIGH);
+      buzzer = false;
+      return;
+    }
+    
+    if (buzzer_oscillate) {
+      digitalWrite(buzzPin, LOW);
+    }
+    else {
+      digitalWrite(buzzPin, HIGH);
+    }
+    
+    buzzer_oscillate = !buzzer_oscillate;
+    buzzer_overflows++;
+  }
 }
