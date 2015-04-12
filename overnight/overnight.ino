@@ -20,6 +20,7 @@ int alarmPinState = 0;
 int lastHourPinState = 1;
 int lastMinPinState = 1;
 int count = 0;
+int count2 = 0;
 int alarmcount = 0;
 int alarmHour = 0;
 int alarmMin = 0;
@@ -68,6 +69,12 @@ void loop() {
         if(hourPinState == LOW){
           Serial.println("Hour Button pressed");
           //increment hour counter
+          if(alarmHour < 23){
+            alarmHour += 1;
+          }
+          else{
+            alarmHour = 0;
+          }
         }
       }
 
@@ -76,6 +83,12 @@ void loop() {
         if(minPinState == LOW){
           Serial.println("Min Button pressed");
           //increment hour counter
+          if(alarmMin < 59){
+            alarmMin += 1;
+          }
+          else{
+            alarmMin = 0;
+          }
         }
       }
 
@@ -84,7 +97,7 @@ void loop() {
       lastHourPinState = hourPinState;
       lastMinPinState = minPinState;
   }
-  else{
+  if(alarmPinState == HIGH){
     alarmSet = false;
   }
 
@@ -109,14 +122,10 @@ void loop() {
   if(count == 10){
     if(alarmSet == false){
       showTime();
-      count=0;
     }
+    count=0;
   }
 
-  if(alarmSet){
-    lcd.clear();
-
-  }
   //alarm check
   if (alarmHour == now.hour()){
     if (alarmMin = now.minute()){
@@ -139,9 +148,16 @@ void loop() {
     count2 = 0;
     alarm = false;
   }
+  
   if (alarm){
     //BUZZ
     digitalWrite(buzzPin, HIGH);
+  }
+
+  if(alarmSet){
+    lcd.clear();
+    //print the current alarm set time
+    lcd.print("ALARM " + String(alarmHour < 10 ? "0" : "") + String(alarmHour) + ":" + (alarmMin < 10 ? "0" : "") + String(alarmMin));
   }
 }
 
