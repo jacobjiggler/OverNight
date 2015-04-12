@@ -8,11 +8,13 @@ const int minPin = 3;
 const int alarmPin = 4;
 const int alarmTogglePin = 5;
 const int buzzPin = 6;
+const int chargePin = 7;
 const int backlightPin = 53;
 
 boolean alarm = false; // Holds the current state of the alarm if on or off
 boolean alarmSet = false; //Is true if alarm button is being held down
 boolean buzzer = false; // holds if the buzzer is on or off
+boolean charge = false;
 int hourPinState = 0;
 int minPinState = 0;
 int alarmPinState = 0;
@@ -23,7 +25,8 @@ int count = 0;
 int alarmcount = 0;
 int alarmHour = 0;
 int alarmMin = 0;
-
+int chargeHour = 25;
+int chargeMin = 61;
 LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 
 
@@ -49,9 +52,10 @@ void setup() {
   pinMode(hourPin, INPUT);
   pinMode(minPin, INPUT);
   pinMode(alarmPin, INPUT);
+  pinMode(alarmTogglePin, INPUT_PULLUP);
+  pinMode(chargePin, OUTPUT);
   pinMode(backlightPin, OUTPUT);
   pinMode(buzzPin, OUTPUT);
-  pinMode(alarmTogglePin, INPUT_PULLUP);
   noTone(buzzPin);
   digitalWrite(buzzPin, HIGH);
   digitalWrite(backlightPin, HIGH);
@@ -82,6 +86,8 @@ void loop() {
           else{
             alarmHour = 0;
           }
+          setChargeTime();
+
         }
       }
 
@@ -96,6 +102,7 @@ void loop() {
           else{
             alarmMin = 0;
           }
+          setChargeTime();
         }
       }
 
@@ -123,6 +130,7 @@ void loop() {
   if (alarmHour == now.hour()){
     if (alarmMin == now.minute()){
       if (!buzzer){
+        //add check here for switch?
         tone(buzzPin, 100, 2000);
         buzzer = true;
       }
@@ -153,4 +161,28 @@ void showTime(){
   Serial.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + "\n");
   lcd.clear();
   lcd.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + (alarm ? "  ALARM" : ""));
+}
+void setChargeTime(){
+  //decrement everything by 70 minutes
+  
+  //set charge to false here and stop charging if already started
+  if (alarmHour == 0){
+    chargeHour = 24;
+  }
+  else {
+    chargeHour = alarmHour - 1;
+  }
+  if(alarmMin <= 10){
+      if (alarmHour == 0){
+        chargeHour = 24;
+      }
+      else {
+        chargeHour = alarmHour - 1;
+      }
+     chargeMin =  60 - (10 - alarmMin);
+  }
+  else {
+   chargeMin = alarmMin - 10;
+  }
+//if now is between charge time and current time begin charging and set charge to 1
 }
