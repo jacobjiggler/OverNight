@@ -1,18 +1,17 @@
 #include <Wire.h>
 #include "RTClib.h"
 #include <LiquidCrystal.h>
-
 RTC_DS1307 RTC;
 DateTime now; // Holds the current date and time information
 const int hourPin = 2;
 const int minPin = 3;
 const int alarmPin = 4;
-const int buzzPin = 5;
+const int buzzPin = 6;
 const int backlightPin = 53;
 
 boolean alarm = false; // Holds the current state of the alarm if on or off
 boolean alarmSet = false; //Is true if alarm button is being held down
-
+boolean buzzer = false; // holds if the buzzer is on or off
 int hourPinState = 0;
 int minPinState = 0;
 int alarmPinState = 0;
@@ -20,7 +19,6 @@ int alarmPinState = 0;
 int lastHourPinState = 1;
 int lastMinPinState = 1;
 int count = 0;
-int count2 = 0;
 int alarmcount = 0;
 int alarmHour = 0;
 int alarmMin = 0;
@@ -129,29 +127,22 @@ void loop() {
   //alarm check
   if (alarmHour == now.hour()){
     if (alarmMin = now.minute()){
-      if (count2 < 50){
-        //BUZZ
-        digitalWrite(buzzPin, HIGH);
+      Serial.println("test");
+      if (!buzzer){
+        tone(buzzPin, 1000);
+        buzzer = true;
       }
-      else {
-        digitalWrite(buzzPin, LOW);
-      }
-      count2+=1;
     }
     //min doesnt match
     else {
-      count2 = 0;
-      digitalWrite(buzzPin, LOW);
+      buzzer = false;
     }
   }
   //hour doesnt match
   else {
-    count2 = 0;
-    digitalWrite(buzzPin, LOW);
+    buzzer = false;
   }
   
-  digitalWrite(buzzPin, HIGH);
-
   if(alarmSet){
     lcd.clear();
     //print the current alarm set time
