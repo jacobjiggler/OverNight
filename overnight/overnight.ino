@@ -51,7 +51,7 @@ void setup() {
   pinMode(alarmPin, INPUT);
   pinMode(backlightPin, OUTPUT);
   pinMode(buzzPin, OUTPUT);
-  pinMode(alarmTogglePin, INPUT);
+  pinMode(alarmTogglePin, INPUT_PULLUP);
   noTone(buzzPin);
   digitalWrite(buzzPin, HIGH);
   digitalWrite(backlightPin, HIGH);
@@ -108,21 +108,7 @@ void loop() {
     alarmSet = false;
   }
 
-  /*
-  hourPinState = digitalRead(hourPin);
-  minPinState = digitalRead(minPin);
-  alarmPinState = digitalRead(alarmPin);
 
-  if(alarmPinState == LOW){
-    Serial.println("alarm");
-  }
-  if(minPinState == LOW){
-    Serial.println("min");
-  }
-  if(hourPinState == LOW){
-    Serial.println("hour");
-  }
-  */
 
   count+=1;
   delay(100);
@@ -137,15 +123,11 @@ void loop() {
   if (alarmHour == now.hour()){
     if (alarmMin == now.minute()){
       if (!buzzer){
-        Serial.println("test");
         tone(buzzPin, 100, 2000);
         buzzer = true;
       }
       else {
-        //noTone(buzzPin);
-        //digitalWrite(buzzPin, LOW);
         digitalWrite(buzzPin, HIGH);
-        Serial.println("test2");
     }
     }
     //min doesnt match
