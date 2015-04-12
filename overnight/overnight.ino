@@ -7,7 +7,7 @@ DateTime now; // Holds the current date and time information
 const int hourPin = 2;
 const int minPin = 3;
 const int alarmPin = 4;
-
+const int buzzPin = 5;
 const int backlightPin = 53;
 
 boolean alarm = false; // Holds the current state of the alarm if on or off
@@ -20,7 +20,7 @@ int alarmPinState = 0;
 int lastHourPinState = 1;
 int lastMinPinState = 1;
 int count = 0;
-
+int alarmcount = 0;
 int alarmHour = 0;
 int alarmMin = 0;
 
@@ -48,7 +48,7 @@ void setup() {
   pinMode(minPin, INPUT);
   pinMode(alarmPin, INPUT);
   pinMode(backlightPin, OUTPUT);
-
+  pinMode(buzzPin, OUTPUT);
   digitalWrite(backlightPin, HIGH);
 }
 
@@ -116,6 +116,32 @@ void loop() {
   if(alarmSet){
     lcd.clear();
 
+  }
+  //alarm check
+  if (alarmHour == now.hour()){
+    if (alarmMin = now.minute()){
+      if (count2 < 50){
+        alarm = true;
+      }
+      else {
+        alarm = false;
+      }
+      count2+=1;
+    }
+    //min doesnt match
+    else {
+      count2 = 0;
+      alarm = false;
+    }
+  }
+  //hour doesnt match
+  else {
+    count2 = 0;
+    alarm = false;
+  }
+  if (alarm){
+    //BUZZ
+    digitalWrite(buzzPin, HIGH);
   }
 }
 
