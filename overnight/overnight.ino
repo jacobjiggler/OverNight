@@ -35,9 +35,6 @@ LiquidCrystal lcd(46, 47, 48, 49, 50, 51, 52);
 
 
 void setup() {
-  //Initialization
-  alarmHour = 10;
-  alarmMin = 15;
   Wire.begin();
   Serial.begin(9600);
 
@@ -47,7 +44,24 @@ void setup() {
 
   //Set up RTC
   RTC.begin();
-  RTC.adjust(DateTime(__DATE__, __TIME__));
+  //RTC.adjust(DateTime(__DATE__, __TIME__));
+  now = RTC.now();
+  
+  // Initialize the alarm set time
+  alarmHour = now.hour();
+  if(now.minute() > 59){
+    alarmHour += 1;
+    alarmMin = 60 - now.minute();
+  }
+  else {
+    alarmMin = now.minute() + 1;
+  }
+  
+  Serial.print("The alarm is initially set to ");
+  Serial.print(alarmHour);
+  Serial.print(":");
+  Serial.print(alarmMin);
+  Serial.print("\n");
 
   // Initialize timer for oscillating the buzzer
   Timer1.initialize(500000);
@@ -73,6 +87,18 @@ void loop() {
   // put your main code here, to run repeatedly:
   alarmPinState = digitalRead(alarmPin);
   alarm = digitalRead(alarmTogglePin);
+  if (!alarm){
+    charge = true;
+    digitalWrite(chargePin, LOW);
+  }
+  else {
+    charge = false;
+    digitalWrite(chargePin, HIGH);
+    if (now.hour() > chargeHour || (now.hour() == chargeHour && now.minute() >= chargeMin) && now.hour() < alarmHour || ( now.hour() == alarmHour && now.minute() < alarmMin)){
+      charge = true;
+      digitalWrite(chargePin, LOW);
+   }
+  }
   if(alarmPinState == LOW){
     alarmSet = true;
     //implement Change Alarm Time
@@ -135,16 +161,14 @@ void loop() {
     if (alarmMin == now.minute()){
       if (now.second() == 0) {
         if (alarm) {
+          charge = false;
+          digitalWrite(chargePin, HIGH);
           Serial.println("initially enabling buzzer");
           buzzer = true;
         }
       }
      }
-     /*
-      else {
-        digitalWrite(buzzPin, HIGH);
-      }
-      */
+
     //min doesnt match
     else {
       buzzer = false;
@@ -154,12 +178,24 @@ void loop() {
   else {
     buzzer = false;
   }
+
+   if (chargeHour == now.hour()){
+    if (chargeMin == now.minute()){
+      if (now.second() == 0) {
+        charge = true;
+        digitalWrite(chargePin, LOW);
+        Serial.println("started charging");
+      }
+     }
+  }
+
   
   if(alarmSet){
     lcd.clear();
     //print the current alarm set time
     lcd.print("ALARM " + String(alarmHour < 10 ? "0" : "") + String(alarmHour) + ":" + (alarmMin < 10 ? "0" : "") + String(alarmMin));
   }
+ //setChargeTime();
 }
 
 void showTime(){
@@ -170,29 +206,39 @@ void showTime(){
   lcd.print((now.hour() < 10 ? "0" : "") + String(now.hour()) + ":" + (now.minute() < 10 ? "0" : "") + now.minute() + ":" + (now.second() < 10 ? "0" : "") + now.second() + (alarm ? "  ALARM" : ""));
 }
 void setChargeTime(){
+   Serial.println(chargeHour);
+   Serial.println(chargeMin);
   //decrement everything by 70 minutes
-  
-  charge = false;
-  digitalWrite(chargePin, HIGH);
-  
-  if (alarmHour == 0){
-    chargeHour = 24;
-  }
-  else {
-    chargeHour = alarmHour - 1;
-  }
-  if(alarmMin <= 10){
-      if (alarmHour == 0){
-        chargeHour = 24;
-      }
-      else {
-        chargeHour = alarmHour - 1;
-      }
-     chargeMin =  60 - (10 - alarmMin);
-  }
-  else {
-   chargeMin = alarmMin - 10;
-  }
+  if(alarm){
+    //charge = false;
+    //digitalWrite(chargePin, HIGH);
+    
+    if (alarmHour == 0){
+      chargeHour = 24;
+    }
+    else {
+      chargeHour = alarmHour - 1;
+    }
+    if(alarmMin <= 10){
+        if (alarmHour == 0){
+          chargeHour = 24;
+        }
+        else {
+          chargeHour = chargeHour - 1;
+        }
+       chargeMin =  60 - (10 - alarmMin);
+    }
+    else {
+     chargeMin = alarmMin - 10;
+    }
+    if (now.hour() > chargeHour || (now.hour() == chargeHour && now.minute() >= chargeMin) && now.hour() < alarmHour || ( now.hour() == alarmHour && now.minute() < alarmMin)){
+      Serial.println("yes");
+      charge = true;
+      digitalWrite(chargePin, LOW);
+   }
+   Serial.println(chargeHour);
+   Serial.println(chargeMin);
+ }
 //if now is between charge time and current time begin charging and set charge to 1
 }
 
